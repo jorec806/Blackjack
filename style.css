@@ -1,0 +1,210 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-image: linear-gradient(to bottom left, #6C54A5, #AC7272);
+}
+
+@font-face {
+    font-family: klassic;
+    src: url(fonts/KlassiqNbp-J2VB.ttf);
+}
+
+@font-face {
+    font-family: opensans;
+    src: url(fonts/OpenSans-Regular.ttf);
+}
+
+@font-face {
+    font-family: opensanslight;
+    src: url(fonts/OpenSans-Light.ttf);
+}    
+
+.background{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    height: 95vh;
+    flex-direction: column;
+}
+
+.frame-board{
+    width: 1030px;
+    height: 580px;
+    border-radius: 20px;
+    display: flex;
+    background-image: linear-gradient(to bottom right, #58DE77, #614FC1 );
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.main-board{
+    width: 1000px;
+    height: 550px;
+    background-image: linear-gradient(to bottom right, #69BE5A, #34AAA1 );
+    border-radius: 10px;
+}
+.section1, .section2, .section3{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.section1{
+    height: 20%;
+    color: white;
+    flex-direction: column;
+}
+
+.title{
+    font-family: klassic;
+    font-size: 50px;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 15px rgb(39, 97, 89);
+}
+
+.subtitle{
+    font-family: opensans;
+    color: white;
+    font-size: 25px;
+    letter-spacing: 3px;
+    text-shadow: 1px 1px 20px rgb(0, 0, 0); 
+}
+
+.subtitle2{
+    font-family: opensans;
+    color: white;
+    font-size: 25px;
+}
+
+.section2{
+    height: 40%;
+}
+
+.section2-data, .section2-deck{
+    width: 20%;
+    height: 100%;
+}
+
+.section2-data{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: opensanslight;
+    color: white;
+    font-size: 20px; 
+}
+
+.section2-dealertable{
+    width: 60%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section2-deck{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info{
+    display: flex;
+}
+
+.card{
+    height: 145px;
+    width: 100px;
+    margin: 5px;
+    background-color: white;
+    box-shadow: 1px 1px 15px rgb(39, 97, 89);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: contain;
+}
+
+.deck{
+    background-image: url(cards/backcard.png);
+    background-size: contain;
+}
+
+.section3{
+    height: 40%;
+}
+
+.section3-buttons{
+    width: 20%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.button{
+    width: 125px;
+    height: 35px;
+    background-color: #5B5BA0;
+    color: white;
+    font-family: opensanslight;
+    letter-spacing: 2px;
+    margin: 5px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.button-newgame, .button-startgame{
+    background-color: #D6373D; 
+}
+
+.button:hover{
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.section3-playertable{
+    width: 53%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.section3-scripts{
+    width: 27%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-family: opensanslight;
+    color: white;
+    font-size: 25px;
+}
+
+.hidden {
+    display: none;
+}
+
+.footer{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: opensanslight;
+    color: white;
+}
