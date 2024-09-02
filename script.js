@@ -14,33 +14,6 @@ const bustMsg = document.querySelector(".you-bust");
 const nextGameMsg = document.querySelector(".next-game");
 const miscMsg = document.querySelector(".misc-msg");
 
-<<<<<<< Updated upstream
-const suit=["H","C","S","D"]
-const value=[2,3,4,5,6,7,8,9,10,11,12,13,"A"];
-let deck=[];
-let turnNumber = 0;
-
-let playerScore =0;
-let dealerScore = 0;
-
-let playerTurn = true;
-//let isPlaying = false;
-
-let cardsDealt = 0;
-
-//cardsGone.textContent = `${turnNumber+1}`;
-
-
-// Create playing cards deck with 52 cards using arrays declared
-function createDeck(){
-    //First loop for the suits
-    for(let x = 0; x < suit.length; x++){
-        //Second loop for the card value 
-        for(let i=0; i <value.length;i++){
-            //Add the generated card to the empty array
-            deck.push(suit[x]+value[i]);
-        }
-=======
 /* Re-structure
 
 IMPORTANT
@@ -136,20 +109,10 @@ function createDeck(numberOfDecks) {
     for (let i = 0; i < value.length; i++) {
       //Add the generated card to the empty array
       deck.push(suit[x] + value[i]);
->>>>>>> Stashed changes
     }
+  }
 }
 
-<<<<<<< Updated upstream
-//Giving random positions to every card
-function shuffleDeck(array){
-    //Create a loop to pick the first item of the array and swap it with another card from a random position
-    for(let a = 0; a < array.length; a++){
-        //Create a random number within the range of the array selected
-        let b = Math.floor(Math.random()*array.length);
-        //using array destructing notation to asign the variables with changed position
-        [array[a],array[b]] = [array[b],array[a]];
-=======
 function shuffleDeck(deck) {
   /*
   The function shuffles a deck of cards(array)
@@ -391,7 +354,6 @@ function cardValue() {
       return 1;
     } else if (!playerTurn && dealerScore + 11 <= 21) {
       return 11;
->>>>>>> Stashed changes
     }
     //To sum up, asign the variable of the "a" position of the current array to the "b" position and vice versa.
 }
