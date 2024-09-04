@@ -93,8 +93,15 @@ FUNCTIONS
 
 //TEMP CONSTANTS
 
-let playerHand = [];
-let dealerHand = [];
+function createPlayer(playerName) {
+  let newPlayer = {
+    name: playerName,
+    score: 0,
+    hand: [],
+  };
+
+  return newPlayer;
+}
 
 function createDeck(numberOfDecks) {
   /*
@@ -117,7 +124,11 @@ function createDeck(numberOfDecks) {
     }
   }
 
-  return deck * numberOfDecks;
+  for (let i = 0; i < numberOfDecks; i++) {
+    multipleDecks = multipleDecks.concat(deck);
+  }
+
+  return multipleDecks;
 }
 
 function shuffleDeck(deck) {
@@ -162,7 +173,7 @@ function createCard(deck) {
   return newCard;
 }
 
-function displayCard(card, playerTurn) {
+function displayCard(card, playerTurn, currentPlayer) {
   /*
   The function displays the card on it respective table (player or dealer)
 
@@ -172,14 +183,12 @@ function displayCard(card, playerTurn) {
 
   if (playerTurn) {
     playerTable.append(card);
-    playerHand.push(card);
+    currentPlayer.push(card);
   } else {
     dealerTable.append(card);
-    dealerHand.push(card);
+    currentPlayer.push(card);
   }
 }
-
-const deckie = ["H3", "CA", "SK", "D9", "H7", "C10", "SJ", "DQ"];
 
 function getCardValue(card) {
   /*
@@ -189,7 +198,7 @@ function getCardValue(card) {
     card : an string containing the suit and value of a card
   */
 
-  let [suit, ...cardValue] = card;
+  let [_, ...cardValue] = card.dataset.value;
   cardValue = cardValue.join("");
 
   if (!isNaN(cardValue)) {
@@ -208,22 +217,20 @@ function checkScore(hand) {
   */
 
   let values = [];
+  for (let i = 0; i < hand.length; i++) {
+    values.push(getCardValue(hand[i]));
+  }
+
   let totalScore = 0;
-
-  hand.forEach((e) => {
-    values.push(getCardValue(e));
-  });
-
   let aces = values.filter((element) => element == "A");
-  let newValues = values
-    .filter((element) => !isNaN(element))
-    .map((element) => {
-      return parseInt(element);
-    });
+  let newValues = values.filter((element) => !isNaN(element));
 
   newValues.forEach((element) => {
     totalScore += element;
   });
+
+  console.log(newValues);
+  console.log(totalScore);
 
   if (aces.length == 1 && totalScore + 11 <= 21) {
     totalScore += 11;
@@ -233,12 +240,24 @@ function checkScore(hand) {
     totalScore += aces.length;
   }
 
+  console.log(`Este es el score total : ${totalScore}`);
   return totalScore;
 }
 
-//const hand = ["H3", "CA", "SK", "D9"];
+let jose = createPlayer("Jose");
+const deckie = ["HJ", "CQ", "SK", "D9", "H7", "C10", "SJ", "DQ"];
+const newCard1 = createCard(deckie);
+displayCard(newCard1, true, jose.hand);
+const newCard2 = createCard(deckie);
+displayCard(newCard2, true, jose.hand);
+const newCard3 = createCard(deckie);
+displayCard(newCard3, true, jose.hand);
 
-//console.log(checkScore(hand));
+checkScore(jose.hand);
+
+console.log(jose.hand);
+
+// console.log(getCardValue(newCard1));
 
 function isBlackJack(hand) {
   /*
