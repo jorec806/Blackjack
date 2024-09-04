@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const buttonHit = document.querySelector(".button-hit");
 const buttonStand = document.querySelector(".button-stand");
@@ -91,6 +91,11 @@ FUNCTIONS
 - dealerTurn()
 */
 
+//TEMP CONSTANTS
+
+let playerHand = [];
+let dealerHand = [];
+
 function createDeck(numberOfDecks) {
   /*
   The function returns a new deck of cards(array) consisting in 52 cards times
@@ -111,6 +116,8 @@ function createDeck(numberOfDecks) {
       deck.push(suit[x] + value[i]);
     }
   }
+
+  return deck * numberOfDecks;
 }
 
 function shuffleDeck(deck) {
@@ -165,10 +172,14 @@ function displayCard(card, playerTurn) {
 
   if (playerTurn) {
     playerTable.append(card);
+    playerHand.push(card);
   } else {
     dealerTable.append(card);
+    dealerHand.push(card);
   }
 }
+
+const deckie = ["H3", "CA", "SK", "D9", "H7", "C10", "SJ", "DQ"];
 
 function getCardValue(card) {
   /*
@@ -178,7 +189,7 @@ function getCardValue(card) {
     card : an string containing the suit and value of a card
   */
 
-  let [suit, ...cardValue] = card.dataset.value;
+  let [suit, ...cardValue] = card;
   cardValue = cardValue.join("");
 
   if (!isNaN(cardValue)) {
@@ -224,6 +235,10 @@ function checkScore(hand) {
 
   return totalScore;
 }
+
+//const hand = ["H3", "CA", "SK", "D9"];
+
+//console.log(checkScore(hand));
 
 function isBlackJack(hand) {
   /*
@@ -356,272 +371,262 @@ function cardValue() {
       return 11;
     }
     //To sum up, asign the variable of the "a" position of the current array to the "b" position and vice versa.
+  }
 }
 
-function newCard (){
-    if(turnNumber>51){
-        miscMsg.textContent = "NO MORE CARDS";
-        miscMsg.classList.remove("hidden");
-        playerTurn = false;
-        return;
-    }
-    if(playerTurn){
-        const newCard = document.createElement("div");
-        playerTable.appendChild(newCard);
-        newCard.classList.add("card");
-        newCard.classList.add(`temp${cardsDealt}`)
-        newCard.style.backgroundImage = `url(cards/${deck[turnNumber]}.png)`;
-        cardsGone.textContent = `${turnNumber+1}`;
-
-        playerScore = playerScore + cardValue();
-        turnNumber++;
-        cardsDealt++;
-        checkScore();
-        //console.log(`current P1 score: ${playerScore}`);
-    } else {
-        const newCard = document.createElement("div");
-        dealerTable.appendChild(newCard);
-        newCard.classList.add("card");
-        newCard.classList.add(`temp${cardsDealt}`);
-        newCard.style.backgroundImage = `url(cards/${deck[turnNumber]}.png)`;
-        cardsGone.textContent = `${turnNumber+1}`;
-
-        dealerScore = dealerScore + cardValue();
-        turnNumber++;
-        cardsDealt++;
-        checkScore();
-    }
-}
-
-function checkScore(){
-    if(playerTurn){
-        if (playerScore>21){
-            playerTurn = false;
-
-            bustMsg.textContent = `You busted!💥`;
-            bustMsg.classList.remove("hidden");
-            winnerMsg.textContent = "Dealer Win😈"
-            winnerMsg.classList.remove("hidden");
-            nextGameMsg.textContent = "Next hand..";
-            nextGameMsg.classList.remove("hidden");
-
-            console.log(`current P1 score: ${playerScore}`);
-            
-            setTimeout(()=>{
-                clearCards();
-                nextHand();
-                } ,3000
-            );
-        } else if (playerScore==21){
-            miscMsg.textContent = "🃏 BLACKJACK 🃏";
-            miscMsg.classList.remove("hidden");
-            winnerMsg.textContent = "You Win🥳"
-            winnerMsg.classList.remove("hidden");
-            nextGameMsg.textContent = "Next hand..";
-            nextGameMsg.classList.remove("hidden");
-
-            console.log(`current P1 score: ${playerScore}`);
-
-            setTimeout(()=>{
-                clearCards();
-                nextHand();
-                } ,3000
-            );
-        } else {
-            return;
-        }
-    } else {
-        if (dealerScore>21){
-            playerTurn = true;
-            miscMsg.textContent = "Dealer busted!💥";
-            miscMsg.classList.remove("hidden");
-            winnerMsg.textContent = "You Win🥳"
-            winnerMsg.classList.remove("hidden");
-            nextGameMsg.textContent = "Next hand..";
-            nextGameMsg.classList.remove("hidden");
-
-            setTimeout(()=>{
-                clearCards();
-                nextHand();
-                } ,3000
-            );
-
-        } else if (dealerScore==21){
-            miscMsg.textContent = "DEALER BLACKJACK😈";
-            miscMsg.classList.remove("hidden");
-            winnerMsg.textContent = "You Lose🤬"
-            winnerMsg.classList.remove("hidden");
-            nextGameMsg.textContent = "Next hand..";
-            nextGameMsg.classList.remove("hidden");
-
-            setTimeout(()=>{
-                clearCards();
-                nextHand();
-                } ,3000
-            );
-        } else {
-            return;
-        }
-    }
-}
-
-function standGame (){
+function newCard() {
+  if (turnNumber > 51) {
+    miscMsg.textContent = "NO MORE CARDS";
+    miscMsg.classList.remove("hidden");
     playerTurn = false;
-    console.log(`current P1 score: ${playerScore}`);
-    dealerTurn();
-    checkWinner();
+    return;
+  }
+  if (playerTurn) {
+    const newCard = document.createElement("div");
+    playerTable.appendChild(newCard);
+    newCard.classList.add("card");
+    newCard.classList.add(`temp${cardsDealt}`);
+    newCard.style.backgroundImage = `url(cards/${deck[turnNumber]}.png)`;
+    cardsGone.textContent = `${turnNumber + 1}`;
 
+    playerScore = playerScore + cardValue();
+    turnNumber++;
+    cardsDealt++;
+    checkScore();
+    //console.log(`current P1 score: ${playerScore}`);
+  } else {
+    const newCard = document.createElement("div");
+    dealerTable.appendChild(newCard);
+    newCard.classList.add("card");
+    newCard.classList.add(`temp${cardsDealt}`);
+    newCard.style.backgroundImage = `url(cards/${deck[turnNumber]}.png)`;
+    cardsGone.textContent = `${turnNumber + 1}`;
+
+    dealerScore = dealerScore + cardValue();
+    turnNumber++;
+    cardsDealt++;
+    checkScore();
+  }
 }
 
-function checkWinner(){
-    if(playerScore>dealerScore && dealerScore<=21){ // 
-        winnerMsg.textContent = "You Win🥳"
-        winnerMsg.classList.remove("hidden");
-        nextGameMsg.textContent = "Next hand..";
-        nextGameMsg.classList.remove("hidden");
+// function checkScore() {
+//   if (playerTurn) {
+//     if (playerScore > 21) {
+//       playerTurn = false;
 
-        setTimeout(()=>{
-            clearCards();
-            nextHand();
-            } ,3000
-        );
+//       bustMsg.textContent = `You busted!💥`;
+//       bustMsg.classList.remove("hidden");
+//       winnerMsg.textContent = "Dealer Win😈";
+//       winnerMsg.classList.remove("hidden");
+//       nextGameMsg.textContent = "Next hand..";
+//       nextGameMsg.classList.remove("hidden");
 
-        console.log("Escenario 1");
+//       console.log(`current P1 score: ${playerScore}`);
 
-    } else if (playerScore<dealerScore && dealerScore<=21) { // 
-        winnerMsg.textContent = "You Lose🤬"
-        winnerMsg.classList.remove("hidden");
-        nextGameMsg.textContent = "Next hand..";
-        nextGameMsg.classList.remove("hidden");
+//       setTimeout(() => {
+//         clearCards();
+//         nextHand();
+//       }, 3000);
+//     } else if (playerScore == 21) {
+//       miscMsg.textContent = "🃏 BLACKJACK 🃏";
+//       miscMsg.classList.remove("hidden");
+//       winnerMsg.textContent = "You Win🥳";
+//       winnerMsg.classList.remove("hidden");
+//       nextGameMsg.textContent = "Next hand..";
+//       nextGameMsg.classList.remove("hidden");
 
-        setTimeout(()=>{
-            clearCards();
-            nextHand();
-            } ,3000
-        );
+//       console.log(`current P1 score: ${playerScore}`);
 
-        console.log("Escenario 2");
+//       setTimeout(() => {
+//         clearCards();
+//         nextHand();
+//       }, 3000);
+//     } else {
+//       return;
+//     }
+//   } else {
+//     if (dealerScore > 21) {
+//       playerTurn = true;
+//       miscMsg.textContent = "Dealer busted!💥";
+//       miscMsg.classList.remove("hidden");
+//       winnerMsg.textContent = "You Win🥳";
+//       winnerMsg.classList.remove("hidden");
+//       nextGameMsg.textContent = "Next hand..";
+//       nextGameMsg.classList.remove("hidden");
 
-    } else if (playerScore==dealerScore && dealerScore<=21){
-        miscMsg.textContent = "It's a TIE";
-        miscMsg.classList.remove("hidden");
+//       setTimeout(() => {
+//         clearCards();
+//         nextHand();
+//       }, 3000);
+//     } else if (dealerScore == 21) {
+//       miscMsg.textContent = "DEALER BLACKJACK😈";
+//       miscMsg.classList.remove("hidden");
+//       winnerMsg.textContent = "You Lose🤬";
+//       winnerMsg.classList.remove("hidden");
+//       nextGameMsg.textContent = "Next hand..";
+//       nextGameMsg.classList.remove("hidden");
 
-        setTimeout(()=>{
-            clearCards();
-            nextHand();
-            } ,3000
-        );
-        console.log("Escenario 3")
-    } else {
-        return;
+//       setTimeout(() => {
+//         clearCards();
+//         nextHand();
+//       }, 3000);
+//     } else {
+//       return;
+//     }
+//   }
+// }
+
+function standGame() {
+  playerTurn = false;
+  console.log(`current P1 score: ${playerScore}`);
+  dealerTurn();
+  checkWinner();
+}
+
+function checkWinner() {
+  if (playerScore > dealerScore && dealerScore <= 21) {
+    //
+    winnerMsg.textContent = "You Win🥳";
+    winnerMsg.classList.remove("hidden");
+    nextGameMsg.textContent = "Next hand..";
+    nextGameMsg.classList.remove("hidden");
+
+    setTimeout(() => {
+      clearCards();
+      nextHand();
+    }, 3000);
+
+    console.log("Escenario 1");
+  } else if (playerScore < dealerScore && dealerScore <= 21) {
+    //
+    winnerMsg.textContent = "You Lose🤬";
+    winnerMsg.classList.remove("hidden");
+    nextGameMsg.textContent = "Next hand..";
+    nextGameMsg.classList.remove("hidden");
+
+    setTimeout(() => {
+      clearCards();
+      nextHand();
+    }, 3000);
+
+    console.log("Escenario 2");
+  } else if (playerScore == dealerScore && dealerScore <= 21) {
+    miscMsg.textContent = "It's a TIE";
+    miscMsg.classList.remove("hidden");
+
+    setTimeout(() => {
+      clearCards();
+      nextHand();
+    }, 3000);
+    console.log("Escenario 3");
+  } else {
+    return;
+  }
+}
+
+function dealerTurn() {
+  while (dealerScore < 17) {
+    newCard();
+  }
+}
+
+function nextHand() {
+  miscMsg.classList.add("hidden");
+  nextGameMsg.classList.add("hidden");
+  winnerMsg.classList.add("hidden");
+  bustMsg.classList.add("hidden");
+
+  setTimeout(() => {
+    newCard();
+    playerTurn = false;
+  }, 500);
+
+  setTimeout(() => {
+    newCard();
+    playerTurn = true;
+  }, 750);
+
+  setTimeout(() => {
+    newCard();
+    playerTurn = false;
+  }, 1000);
+
+  setTimeout(() => {
+    newCard();
+    playerTurn = true;
+  }, 1250);
+
+  playerTurn = true;
+}
+
+function clearCards() {
+  for (let c = 0; c < cardsDealt; c++) {
+    const removeNewCard = document.querySelector(`.temp${c}`);
+    removeNewCard.remove();
+  }
+  resetValues();
+}
+
+function cardValue() {
+  let a = [...deck[turnNumber]];
+  let card;
+
+  if (a.length > 2) {
+    return 10;
+  } else if (a.includes("A")) {
+    if (playerTurn && playerScore + 11 > 21) {
+      return 1;
+    } else if (playerTurn && playerScore + 11 <= 21) {
+      return 11;
+    } else if (!playerTurn && dealerScore + 11 > 21) {
+      return 1;
+    } else if (!playerTurn && dealerScore + 11 <= 21) {
+      return 11;
     }
+  } else {
+    let card = Number(a[1]);
+    return card;
+  }
 }
 
-function dealerTurn(){
-    while(dealerScore<17){
-        newCard();
-    }
+function resetValues() {
+  playerScore = 0;
+  dealerScore = 0;
+
+  playerTurn = true;
+  cardsDealt = 0;
 }
 
-function nextHand(){
+function startGame() {
+  if (!playerTurn) return;
 
-    miscMsg.classList.add("hidden");
-    nextGameMsg.classList.add("hidden");
-    winnerMsg.classList.add("hidden");
-    bustMsg.classList.add("hidden");   
+  turnNumber = 0;
 
-    setTimeout(()=>{
-        newCard();
-        playerTurn=false;
-    },500);
+  resetValues();
+  shuffleDeck(deck);
+  shuffleDeck(deck);
 
-    setTimeout(()=>{
-        newCard();
-        playerTurn=true;
-    },750);
+  nextHand();
 
-    setTimeout(()=>{
-        newCard();
-        playerTurn=false;
-    },1000);
+  buttonHit.classList.remove("hidden");
+  buttonStand.classList.remove("hidden");
+  buttonNewGame.classList.remove("hidden");
+  buttonStartGame.classList.add("hidden");
 
-    setTimeout(()=>{
-        newCard();
-        playerTurn=true;
-    },1250);
-
-    playerTurn=true;
-}
-
-function clearCards(){
-    for(let c = 0; c < cardsDealt; c++){
-        const removeNewCard = document.querySelector(`.temp${c}`);
-        removeNewCard.remove();
-    }
-    resetValues();
-}
-
-function cardValue(){
-    let a =[ ...deck[turnNumber]];
-    let card;
-
-    if(a.length>2){
-        return 10;
-    } else if (a.includes("A")){
-        if(playerTurn && (playerScore + 11 >21)){
-            return 1;
-        } else if (playerTurn && (playerScore + 11 <= 21)){
-            return 11;
-        } else if ((!playerTurn) && (dealerScore + 11 > 21)){
-            return 1;
-        } else if (!playerTurn && (dealerScore + 11 <= 21)){
-            return 11;
-        }    
-    } else {
-        let card = Number(a[1]);
-        return card;
-    }
-}
-
-function resetValues(){
-
-playerScore =0;
-dealerScore = 0;
-
-playerTurn = true;
-cardsDealt = 0;
-}
-
-function startGame(){
-    if(!playerTurn) return;
-
-    turnNumber=0;
-
-    resetValues();
-    shuffleDeck(deck);
-    shuffleDeck(deck);
-
-    nextHand();
-
-    buttonHit.classList.remove("hidden");
-    buttonStand.classList.remove("hidden");
-    buttonNewGame.classList.remove("hidden");
-    buttonStartGame.classList.add("hidden");
-
-    playerTurn=true;
-    console.log(deck);
+  playerTurn = true;
+  console.log(deck);
 }
 
 function newGame() {
-    clearCards();
-    playerTurn=true;
-    startGame();
+  clearCards();
+  playerTurn = true;
+  startGame();
 }
 
-buttonHit.addEventListener("click",newCard);
-buttonStand.addEventListener("click",standGame);
-buttonNewGame.addEventListener("click",newGame);
-buttonStartGame.addEventListener("click",startGame);
+buttonHit.addEventListener("click", newCard);
+buttonStand.addEventListener("click", standGame);
+buttonNewGame.addEventListener("click", newGame);
+buttonStartGame.addEventListener("click", startGame);
 
 createDeck();
 
