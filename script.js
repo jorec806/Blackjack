@@ -76,13 +76,15 @@ FUNCTIONS
 - suffleDeck: no modification donce
 - newDeck(): function not needed
 - createCard() Creates a new card and gets a value from the a
-- drawCard(): -------------
 - displayCard(): Puts the card onto the board according to turn
-- checkScore(): Function was modified to receive a array (hand) as parameter and get the total points on the hand.
+- checkScore(): Function was modified to receive a array (hand) as parameter 
+                and get the total points on the hand.
+- getCardValue(): Function modified to get a node as parameter
+- isBlackJack(): Function accepts an array of nodes as parameter. Done
+- createPlayer(): Function for creating an object to act as a player
 
-- getCardValue()
 - isPlayerTurn()
-- isBlackJack()
+- drawCard(): -------------
 - startGame() or newGame()
 - stand()
 - hit()
@@ -136,7 +138,8 @@ function shuffleDeck(deck) {
   The function shuffles a deck of cards(array)
   */
 
-  //Create a loop to pick the first item of the array and swap it with another card from a random position
+  /*Create a loop to pick the first item of the array and swap it with another 
+    card from a random position*/
   for (let a = 0; a < deck.length; a++) {
     //Create a random number within the range of the array selected
     let b = Math.floor(Math.random() * deck.length);
@@ -195,7 +198,7 @@ function getCardValue(card) {
   The function evaluates card(string) and returns its value.
 
   Parameter:
-    card : an string containing the suit and value of a card
+    card : a node representing a card
   */
 
   let [_, ...cardValue] = card.dataset.value;
@@ -208,18 +211,31 @@ function getCardValue(card) {
   return cardValue;
 }
 
-function checkScore(hand) {
+function getHandValues(hand) {
   /*
-  The function evaluates how many pts a player has.
+  The function returns an array of card values. "A" value will remain the same.
 
   Parameter:
-    hand : an array with all cards the player/dealer has
+    hand : an array with card nodes
   */
 
   let values = [];
   for (let i = 0; i < hand.length; i++) {
     values.push(getCardValue(hand[i]));
   }
+
+  return values;
+}
+
+function checkScore(hand) {
+  /*
+  The function evaluates how many pts a player has.
+
+  Parameter:
+    hand : an array with card nodes
+  */
+
+  let values = getHandValues(hand);
 
   let totalScore = 0;
   let aces = values.filter((element) => element == "A");
@@ -229,9 +245,6 @@ function checkScore(hand) {
     totalScore += element;
   });
 
-  console.log(newValues);
-  console.log(totalScore);
-
   if (aces.length == 1 && totalScore + 11 <= 21) {
     totalScore += 11;
   } else if (aces.length == 1 && totalScore + 11 > 21) {
@@ -240,47 +253,33 @@ function checkScore(hand) {
     totalScore += aces.length;
   }
 
-  console.log(`Este es el score total : ${totalScore}`);
+  console.log(`This is the total score : ${totalScore}`);
   return totalScore;
 }
-
-let jose = createPlayer("Jose");
-const deckie = ["HJ", "CQ", "SK", "D9", "H7", "C10", "SJ", "DQ"];
-const newCard1 = createCard(deckie);
-displayCard(newCard1, true, jose.hand);
-const newCard2 = createCard(deckie);
-displayCard(newCard2, true, jose.hand);
-const newCard3 = createCard(deckie);
-displayCard(newCard3, true, jose.hand);
-
-checkScore(jose.hand);
-
-console.log(jose.hand);
-
-// console.log(getCardValue(newCard1));
 
 function isBlackJack(hand) {
   /*
   The function evaluates if the hand passed is blackjack or not.
 
   Parameter:
-    hand : an array with all cards the player/dealer has
+    hand : an array with card nodes
   */
 
   if (hand.length != 2) return false;
-
-  let values = hand.map((e) => {
-    return getCardValue(e);
-  });
+  if (checkScore(hand) == 21) return true;
+  else return false;
 }
 
-const suit2 = ["H10", "HA"];
-
-// const carta = drawCard(suit);
-// console.log(carta);
-// displayCard(carta, true);
-// console.log(playerHand);
-// isBlackJack(suit2);
+// let jose = createPlayer("Jose");
+// const deckie = ["H9", "CA", "SK", "D9", "H7", "C10", "SJ", "DQ"];
+// const newCard1 = createCard(deckie);
+// displayCard(newCard1, true, jose.hand);
+// const newCard2 = createCard(deckie);
+// displayCard(newCard2, true, jose.hand);
+// const newCard3 = createCard(deckie);
+// displayCard(newCard3, true, jose.hand);
+// checkScore(jose.hand);
+// console.log(isBlackJack(jose.hand));
 
 function standGame() {
   playerTurn = false;
