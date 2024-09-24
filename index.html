@@ -58,6 +58,44 @@
         </div>
       </div>
     </div>
+    <div id="modal" class="modal">
+      <div class="modal-window">
+        <h2>BLACKJACK</h2>
+        <p>
+          Get a hand value as close to 21 as possible without going over. <br />
+          <br />
+          Card values:<br />
+          - Number cards (2-10) are worth their face value. <br />
+          - Face cards (J, Q, K) are worth 10. <br />
+          - Aces can be worth 1 or 11, whichever benefits the hand.<br />
+          <br />
+          Player actions:<br />
+          - Hit: Ask for another card. <br />
+          - Stand: Keep your current hand.<br />
+          <br />
+          Dealer's turn:<br />
+          - The dealer must keep drawing cards until reaching at least 17.
+          <br />
+          - If the dealer goes over 21, players win automatically if they
+          haven't busted.<br />
+          <br />
+          Winning or losing:<br />
+          - You win if your hand is closer to 21 than the dealer's.<br />
+          - You lose if you go over 21.<br />
+          - If the dealer's hand is closer to 21, you lose.<br />
+        </p>
+        <div class="selector-container">
+          <p>Select number of decks:</p>
+          <div class="deck-selector-container">
+            <div class="deck-selector">2</div>
+            <div class="deck-selector">4</div>
+            <div class="deck-selector">6</div>
+            <div class="deck-selector">8</div>
+          </div>
+        </div>
+        <p class="button modal-button" id="closeModal">START PLAYING!</p>
+      </div>
+    </div>
     <div class="footer">®2022 Designed with ❤️ by Jose in Australia</div>
     <script src="script.js"></script>
   </body>
