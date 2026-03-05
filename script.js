@@ -1,666 +1,280 @@
 "use strict";
 
-const buttonHit = document.querySelector(".button-hit");
-const buttonStand = document.querySelector(".button-stand");
-const buttonNewGame = document.querySelector(".button-newgame");
-const buttonStartGame = document.querySelector(".button-startgame");
-const playerTable = document.querySelector(".section3-playertable");
-const dealerTable = document.querySelector(".section2-dealertable");
+const logic = window.BlackjackLogic;
 
-const cardsGone = document.querySelector(".cards-gone");
-const currentTurnMsg = document.querySelector(".dealer-your");
-const winnerMsg = document.querySelector(".win-lose");
-const bustMsg = document.querySelector(".you-bust");
-const nextGameMsg = document.querySelector(".next-game");
-const miscMsg = document.querySelector(".misc-msg");
+const ui = {
+  buttonHit: document.querySelector(".button-hit"),
+  buttonStand: document.querySelector(".button-stand"),
+  buttonNewGame: document.querySelector(".button-newgame"),
+  buttonStartGame: document.querySelector(".button-startgame"),
+  playerTable: document.querySelector(".section3-playertable"),
+  dealerTable: document.querySelector(".section2-dealertable"),
+  cardsGone: document.querySelector(".cards-gone"),
+  currentTurnMsg: document.querySelector(".dealer-your"),
+  winnerMsg: document.querySelector(".win-lose"),
+  bustMsg: document.querySelector(".you-bust"),
+  nextGameMsg: document.querySelector(".next-game"),
+  miscMsg: document.querySelector(".misc-msg"),
+  modal: document.querySelector("#modal"),
+  closeModal: document.querySelector("#closeModal"),
+  deckSelectors: [...document.querySelectorAll(".deck-selector")],
+  decksValue: document.querySelector(".decks-value"),
+  countValue: document.querySelector(".count-value"),
+};
 
-/* Re-structure
+const state = {
+  selectedDecks: null,
+  deck: [],
+  playerHand: [],
+  dealerHand: [],
+  playerTurn: false,
+  roundActive: false,
+  cardsGone: 0,
+  runningCount: 0,
+  hasSelectedDeck: false,
+};
 
-IMPORTANT
-- Ace value depend on hand (either 11 or 1)
-
-CSS
-1. Restructure boxes, make them fixed
-2. Responsive
-3. ANIMACIONES: poner las cartas displayed en el maso y que vayan moviendose
-al tablero del dealer o player
-
-JAVASCRIPT
-
-1. Display board with NOT all butons, just Start Game and show a MODAL with the
-rules.
-
-2. When (ok) button is hit in the modal, it disappear and the game board can be
-accessed. The board must have a button to display the MODAL again to show rules
-Also, Display TITLE at the top, start game BUTTON in the middle with an image
-
-3. When the start game BUTTON is pressed, FIRST, cards are dealt for player and
-DEALER. First card is open for both Player, but second card is opened only for
-PLAYER. SECOND, the HIT, STAND AND NEW GAME BUTTONS are displayed. Also, the
-CARD COUNTING SECTION is displayed with counters on ZERO and DECK is Displayed
-
-    3.0. Before Player is able to press another button, FUNCTION (checkScore) 
-    and (playerWinner) is evualuated to check if any of players have:
-        - Blackjack
-        - 21 points
-        - higher score
-
-    3.1. If Player gets BLACKJACK in the first Turn, wins automatically and
-    another game is started
-
-    3.2. When HIT BUTTON is pressed, one more card is dealt to Player and the
-    FUNCTION (checkScore) evualuates if the score is higher than 21 pts. If so
-    Player loses the match. If not, Player can press BUTTON to invoke the 
-    FUNCTION (createCard) to get one more card and FUNCTION (checkScore) is
-    evaluated again, and so on.
-
-    3.3. If player keeps drawing and obtains more than 21 pts, loses the hand
-    and AI PLAYER does NOT have to play
-
-    3.4.Instead if PLAYER has less than 21pts and STAND BUTTON is pressed,  
-    Player Turn is finished and AI Player turn starts
-
-4. the FUNCTION (isAIturn) is invoked. This function will act as an AI player.
-AI will play against the PLAYER and will start its turn iff PLAYER: has not 
-reached 21 pts and STAND button was pressed. 
-
-    4.0. DEALER(AI) will keep drawing cards until 17pts or less, it means that
-    draws card on 16pts but stands on 17pts
-
-    4.1. With every Draw, the checkscore() is evaluated to see if Dealer
-    WINS or LOSES
-
-
-FUNCTIONS
-- createDeck() :was modified to accept a parameter to add more than 1 deck
-- suffleDeck: no modification donce
-- newDeck(): function not needed
-- createCard() Creates a new card and gets a value from the a
-- displayCard(): Puts the card onto the board according to turn
-- checkScore(): Function was modified to receive a array (hand) as parameter 
-                and get the total points on the hand.
-- getCardValue(): Function modified to get a node as parameter
-- isBlackJack(): Function accepts an array of nodes as parameter. Done
-- createPlayer(): Function for creating an object to act as a player
-
-- isPlayerTurn()
-- drawCard(): -------------
-- startGame() or newGame()
-- stand()
-- hit()
-- initialValues()
-- resetValues()
-- dealerTurn()
-*/
-
-//TEMP CONSTANTS
-
-function createPlayer(playerName) {
-  let newPlayer = {
-    name: playerName,
-    score: 0,
-    hand: [],
-  };
-
-  return newPlayer;
+function setHidden(element, hidden) {
+  element.classList.toggle("hidden", hidden);
 }
 
-function createDeck(numberOfDecks) {
-  /*
-  The function returns a new deck of cards(array) consisting in 52 cards times
-  how many decks are passed as argument
-   */
-
-  let deck = [];
-  let multipleDecks = [];
-
-  const suit = ["H", "C", "S", "D"];
-  const value = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"];
-
-  //First loop for the suits
-  for (let x = 0; x < suit.length; x++) {
-    //Second loop for the card value
-    for (let i = 0; i < value.length; i++) {
-      //Add the generated card to the empty array
-      deck.push(suit[x] + value[i]);
-    }
-  }
-
-  for (let i = 0; i < numberOfDecks; i++) {
-    multipleDecks = multipleDecks.concat(deck);
-  }
-
-  return multipleDecks;
+function resetMessages() {
+  setHidden(ui.currentTurnMsg, true);
+  setHidden(ui.winnerMsg, true);
+  setHidden(ui.bustMsg, true);
+  setHidden(ui.nextGameMsg, true);
+  setHidden(ui.miscMsg, true);
 }
 
-function shuffleDeck(deck) {
-  /*
-  The function shuffles a deck of cards(array)
-  */
-
-  /*Create a loop to pick the first item of the array and swap it with another 
-    card from a random position*/
-  for (let a = 0; a < deck.length; a++) {
-    //Create a random number within the range of the array selected
-    let b = Math.floor(Math.random() * deck.length);
-    //using array destructing notation to asign the variables with changed position
-    [deck[a], deck[b]] = [deck[b], deck[a]];
-  }
-}
-
-function createCard(deck) {
-  /*
-  The function returns a new card and asigns a value and suit
-
-  Parameter:
-    deck : an array of cards
-  */
-
-  const card = deck.shift();
-  const newCard = document.createElement("div");
-
-  newCard.classList.add("card");
-  newCard.style.backgroundImage = `url(cards/${card}.png)`;
-  newCard.dataset.value = card;
-
-  //Dataset to modify the value of Jack, Queen, King
-
-  if (
-    newCard.dataset.value.includes(["Q"]) ||
-    newCard.dataset.value.includes(["K"]) ||
-    newCard.dataset.value.includes(["J"])
-  ) {
-    newCard.dataset.value = newCard.dataset.value[0] + "10";
+function updateCounters() {
+  ui.cardsGone.textContent = String(state.cardsGone);
+  ui.decksValue.textContent =
+    state.selectedDecks === null ? "-" : String(state.selectedDecks);
+  if (!state.hasSelectedDeck || state.selectedDecks === null) {
+    ui.countValue.textContent = "RC 0 | TC 0.0";
+    return;
   }
 
-  return newCard;
+  const trueCount = logic.getTrueCount(state.runningCount, state.deck.length);
+  const runningLabel =
+    state.runningCount > 0 ? `+${state.runningCount}` : String(state.runningCount);
+  const trueLabel = trueCount > 0 ? `+${trueCount.toFixed(1)}` : trueCount.toFixed(1);
+  ui.countValue.textContent = `RC ${runningLabel} | TC ${trueLabel}`;
 }
 
-function displayCard(card, playerTurn, currentPlayer) {
-  /*
-  The function displays the card on it respective table (player or dealer)
-
-  Parameter:
-    card : div containing the card itself
-  */
-
-  if (playerTurn) {
-    playerTable.append(card);
-    currentPlayer.push(card);
-  } else {
-    dealerTable.append(card);
-    currentPlayer.push(card);
-  }
+function createCardNode(cardCode, hiddenCard = false) {
+  const card = document.createElement("div");
+  card.classList.add("card");
+  card.style.backgroundImage = hiddenCard
+    ? "url(cards/backcard.png)"
+    : `url(cards/${cardCode}.png)`;
+  return card;
 }
 
-function getCardValue(card) {
-  /*
-  The function evaluates card(string) and returns its value.
+function renderHands() {
+  ui.playerTable.innerHTML = "";
+  ui.dealerTable.innerHTML = "";
 
-  Parameter:
-    card : a node representing a card
-  */
-
-  let [_, ...cardValue] = card.dataset.value;
-  cardValue = cardValue.join("");
-
-  if (!isNaN(cardValue)) {
-    cardValue = parseInt(cardValue);
-  }
-
-  return cardValue;
-}
-
-function getHandValues(hand) {
-  /*
-  The function returns an array of card values. "A" value will remain the same.
-
-  Parameter:
-    hand : an array with card nodes
-  */
-
-  let values = [];
-  for (let i = 0; i < hand.length; i++) {
-    values.push(getCardValue(hand[i]));
-  }
-
-  return values;
-}
-
-function checkScore(hand) {
-  /*
-  The function evaluates how many pts a player has.
-
-  Parameter:
-    hand : an array with card nodes
-  */
-
-  let values = getHandValues(hand);
-
-  let totalScore = 0;
-  let aces = values.filter((element) => element == "A");
-  let newValues = values.filter((element) => !isNaN(element));
-
-  newValues.forEach((element) => {
-    totalScore += element;
+  state.playerHand.forEach((cardCode) => {
+    ui.playerTable.append(createCardNode(cardCode));
   });
 
-  if (aces.length == 1 && totalScore + 11 <= 21) {
-    totalScore += 11;
-  } else if (aces.length == 1 && totalScore + 11 > 21) {
-    totalScore += aces.length;
-  } else if (aces.length > 1) {
-    totalScore += aces.length;
+  state.dealerHand.forEach((cardCode, index) => {
+    const hideCard = state.playerTurn && state.roundActive && index === 1;
+    ui.dealerTable.append(createCardNode(cardCode, hideCard));
+  });
+}
+
+function drawCardTo(hand) {
+  if (state.deck.length === 0) {
+    return null;
   }
 
-  console.log(`This is the total score : ${totalScore}`);
-  return totalScore;
+  const card = state.deck.shift();
+  hand.push(card);
+  state.cardsGone += 1;
+  state.runningCount += logic.runningCountDelta(card);
+  return card;
 }
 
-function isBlackJack(hand) {
-  /*
-  The function evaluates if the hand passed is blackjack or not.
+function endRound(message, winnerText, bustText, miscText) {
+  state.roundActive = false;
+  state.playerTurn = false;
+  renderHands();
 
-  Parameter:
-    hand : an array with card nodes
-  */
+  resetMessages();
 
-  if (hand.length != 2) return false;
-  if (checkScore(hand) == 21) return true;
-  else return false;
+  if (message) {
+    ui.currentTurnMsg.textContent = message;
+    setHidden(ui.currentTurnMsg, false);
+  }
+  if (winnerText) {
+    ui.winnerMsg.textContent = winnerText;
+    setHidden(ui.winnerMsg, false);
+  }
+  if (bustText) {
+    ui.bustMsg.textContent = bustText;
+    setHidden(ui.bustMsg, false);
+  }
+  if (miscText) {
+    ui.miscMsg.textContent = miscText;
+    setHidden(ui.miscMsg, false);
+  }
+
+  ui.nextGameMsg.textContent = "Press NEW GAME";
+  setHidden(ui.nextGameMsg, false);
+
+  updateCounters();
 }
 
-// let jose = createPlayer("Jose");
-// const deckie = ["H9", "CA", "SK", "D9", "H7", "C10", "SJ", "DQ"];
-// const newCard1 = createCard(deckie);
-// displayCard(newCard1, true, jose.hand);
-// const newCard2 = createCard(deckie);
-// displayCard(newCard2, true, jose.hand);
-// const newCard3 = createCard(deckie);
-// displayCard(newCard3, true, jose.hand);
-// checkScore(jose.hand);
-// console.log(isBlackJack(jose.hand));
+function evaluateStartHands() {
+  const playerBlackjack = logic.isBlackjack(state.playerHand);
+  const dealerBlackjack = logic.isBlackjack(state.dealerHand);
 
-///////////////////////////////// APPARENTLY ALL GOOD//////////////////////
+  if (!playerBlackjack && !dealerBlackjack) {
+    state.playerTurn = true;
+    ui.currentTurnMsg.textContent = "Your turn";
+    setHidden(ui.currentTurnMsg, false);
+    return;
+  }
+
+  if (playerBlackjack && dealerBlackjack) {
+    endRound("Round finished", "Push", "", "Both have Blackjack");
+    return;
+  }
+
+  if (playerBlackjack) {
+    endRound("Round finished", "You Win🥳", "", "BLACKJACK 🃏");
+    return;
+  }
+
+  endRound("Round finished", "You Lose🤬", "", "Dealer Blackjack😈");
+}
 
 function startGame() {
-  // if (!playerTurn) return;
-  // turnNumber = 0;
-  // resetValues();
-  // shuffleDeck(deck);
-  // shuffleDeck(deck);
-  // nextHand();
-  // buttonHit.classList.remove("hidden");
-  // buttonStand.classList.remove("hidden");
-  // buttonNewGame.classList.remove("hidden");
-  // buttonStartGame.classList.add("hidden");
-  // playerTurn = true;
-  // console.log(deck);
-  /* 
-  THINGH I NEED TO START A NEW GAME
-  - RESET VALUES ( If a previous game was created already)
-  - CREATE PLAYERS
-  - DISPLAY BUTTONS
-  - CREATE DECK
-  - new deck
-
-  - GAME TURN (LOOP)
-    - Player turn
-    - Check Score
-    - Dealer turn
-    - Check Score
-    - Check Winner
-
-  create*/
-}
-
-// function checkScore() {
-//   if (playerTurn) {
-//     if (playerScore > 21) {
-//       playerTurn = false;
-
-//       bustMsg.textContent = `You busted!💥`;
-//       bustMsg.classList.remove("hidden");
-//       winnerMsg.textContent = "Dealer Win😈";
-//       winnerMsg.classList.remove("hidden");
-//       nextGameMsg.textContent = "Next hand..";
-//       nextGameMsg.classList.remove("hidden");
-
-//       console.log(`current P1 score: ${playerScore}`);
-
-//       setTimeout(() => {
-//         clearCards();
-//         nextHand();
-//       }, 3000);
-//     } else if (playerScore == 21) {
-//       miscMsg.textContent = "🃏 BLACKJACK 🃏";
-//       miscMsg.classList.remove("hidden");
-//       winnerMsg.textContent = "You Win🥳";
-//       winnerMsg.classList.remove("hidden");
-//       nextGameMsg.textContent = "Next hand..";
-//       nextGameMsg.classList.remove("hidden");
-
-//       console.log(`current P1 score: ${playerScore}`);
-
-//       setTimeout(() => {
-//         clearCards();
-//         nextHand();
-//       }, 3000);
-//     } else {
-//       return;
-//     }
-//   } else {
-//     if (dealerScore > 21) {
-//       playerTurn = true;
-//       miscMsg.textContent = "Dealer busted!💥";
-//       miscMsg.classList.remove("hidden");
-//       winnerMsg.textContent = "You Win🥳";
-//       winnerMsg.classList.remove("hidden");
-//       nextGameMsg.textContent = "Next hand..";
-//       nextGameMsg.classList.remove("hidden");
-
-//       setTimeout(() => {
-//         clearCards();
-//         nextHand();
-//       }, 3000);
-//     } else if (dealerScore == 21) {
-//       miscMsg.textContent = "DEALER BLACKJACK😈";
-//       miscMsg.classList.remove("hidden");
-//       winnerMsg.textContent = "You Lose🤬";
-//       winnerMsg.classList.remove("hidden");
-//       nextGameMsg.textContent = "Next hand..";
-//       nextGameMsg.classList.remove("hidden");
-
-//       setTimeout(() => {
-//         clearCards();
-//         nextHand();
-//       }, 3000);
-//     } else {
-//       return;
-//     }
-//   }
-// }
-
-function standGame() {
-  playerTurn = false;
-  console.log(`current P1 score: ${playerScore}`);
-  dealerTurn();
-  checkWinner();
-}
-
-function checkWinner() {
-  if (playerScore > dealerScore && dealerScore <= 21) {
-    //
-    winnerMsg.textContent = "You Win🥳";
-    winnerMsg.classList.remove("hidden");
-    nextGameMsg.textContent = "Next hand..";
-    nextGameMsg.classList.remove("hidden");
-
-    setTimeout(() => {
-      clearCards();
-      nextHand();
-    }, 3000);
-
-    console.log("Escenario 1");
-  } else if (playerScore < dealerScore && dealerScore <= 21) {
-    //
-    winnerMsg.textContent = "You Lose🤬";
-    winnerMsg.classList.remove("hidden");
-    nextGameMsg.textContent = "Next hand..";
-    nextGameMsg.classList.remove("hidden");
-
-    setTimeout(() => {
-      clearCards();
-      nextHand();
-    }, 3000);
-
-    console.log("Escenario 2");
-  } else if (playerScore == dealerScore && dealerScore <= 21) {
-    miscMsg.textContent = "It's a TIE";
-    miscMsg.classList.remove("hidden");
-
-    setTimeout(() => {
-      clearCards();
-      nextHand();
-    }, 3000);
-    console.log("Escenario 3");
-  } else {
+  if (!state.hasSelectedDeck || state.selectedDecks === null) {
+    ui.modal.classList.remove("hidden");
     return;
   }
+
+  const needsNewShoe = state.deck.length < 15;
+  if (needsNewShoe) {
+    state.deck = logic.createDeck(state.selectedDecks);
+    logic.shuffleDeck(state.deck);
+    state.cardsGone = 0;
+    state.runningCount = 0;
+  }
+
+  state.playerHand = [];
+  state.dealerHand = [];
+  state.roundActive = true;
+  state.playerTurn = false;
+
+  drawCardTo(state.playerHand);
+  drawCardTo(state.dealerHand);
+  drawCardTo(state.playerHand);
+  drawCardTo(state.dealerHand);
+
+  setHidden(ui.buttonStartGame, true);
+  setHidden(ui.buttonHit, false);
+  setHidden(ui.buttonStand, false);
+  setHidden(ui.buttonNewGame, false);
+
+  resetMessages();
+  renderHands();
+  updateCounters();
+  evaluateStartHands();
 }
 
-function dealerTurn() {
-  while (dealerScore < 17) {
-    newCard();
+function onHit() {
+  if (!state.roundActive || !state.playerTurn) {
+    return;
+  }
+
+  drawCardTo(state.playerHand);
+  renderHands();
+  updateCounters();
+
+  const playerScore = logic.getHandValue(state.playerHand);
+  if (playerScore > 21) {
+    endRound("Round finished", "Dealer Win😈", "You busted!💥", "");
   }
 }
 
-function nextHand() {
-  miscMsg.classList.add("hidden");
-  nextGameMsg.classList.add("hidden");
-  winnerMsg.classList.add("hidden");
-  bustMsg.classList.add("hidden");
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = false;
-  }, 500);
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = true;
-  }, 750);
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = false;
-  }, 1000);
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = true;
-  }, 1250);
-
-  playerTurn = true;
-}
-
-function clearCards() {
-  for (let c = 0; c < cardsDealt; c++) {
-    const removeNewCard = document.querySelector(`.temp${c}`);
-    removeNewCard.remove();
+function onStand() {
+  if (!state.roundActive) {
+    return;
   }
-  resetValues();
-}
 
-function cardValue() {
-  let a = [...deck[turnNumber]];
-  let card;
+  state.playerTurn = false;
+  renderHands();
 
-  if (a.length > 2) {
-    return 10;
-  } else if (a.includes("A")) {
-    if (playerTurn && playerScore + 11 > 21) {
-      return 1;
-    } else if (playerTurn && playerScore + 11 <= 21) {
-      return 11;
-    } else if (!playerTurn && dealerScore + 11 > 21) {
-      return 1;
-    } else if (!playerTurn && dealerScore + 11 <= 21) {
-      return 11;
+  while (logic.getHandValue(state.dealerHand) < 17) {
+    drawCardTo(state.dealerHand);
+  }
+
+  renderHands();
+  updateCounters();
+
+  const dealerScore = logic.getHandValue(state.dealerHand);
+  const outcome = logic.compareHands(state.playerHand, state.dealerHand);
+
+  if (outcome === "player") {
+    if (dealerScore > 21) {
+      endRound("Round finished", "You Win🥳", "Dealer busted!💥", "");
+    } else {
+      endRound("Round finished", "You Win🥳", "", "");
     }
-    //To sum up, asign the variable of the "a" position of the current array to the "b" position and vice versa.
-  }
-}
-
-function newCard() {
-  if (turnNumber > 51) {
-    miscMsg.textContent = "NO MORE CARDS";
-    miscMsg.classList.remove("hidden");
-    playerTurn = false;
-    return;
-  }
-  if (playerTurn) {
-    const newCard = document.createElement("div");
-    playerTable.appendChild(newCard);
-    newCard.classList.add("card");
-    newCard.classList.add(`temp${cardsDealt}`);
-    newCard.style.backgroundImage = `url(cards/${deck[turnNumber]}.png)`;
-    cardsGone.textContent = `${turnNumber + 1}`;
-
-    playerScore = playerScore + cardValue();
-    turnNumber++;
-    cardsDealt++;
-    checkScore();
-    //console.log(`current P1 score: ${playerScore}`);
+  } else if (outcome === "dealer") {
+    endRound("Round finished", "You Lose🤬", "", "");
   } else {
-    const newCard = document.createElement("div");
-    dealerTable.appendChild(newCard);
-    newCard.classList.add("card");
-    newCard.classList.add(`temp${cardsDealt}`);
-    newCard.style.backgroundImage = `url(cards/${deck[turnNumber]}.png)`;
-    cardsGone.textContent = `${turnNumber + 1}`;
-
-    dealerScore = dealerScore + cardValue();
-    turnNumber++;
-    cardsDealt++;
-    checkScore();
+    endRound("Round finished", "Push", "", "It's a TIE");
   }
 }
 
-function standGame() {
-  playerTurn = false;
-  console.log(`current P1 score: ${playerScore}`);
-  dealerTurn();
-  checkWinner();
-}
-
-function checkWinner() {
-  if (playerScore > dealerScore && dealerScore <= 21) {
-    //
-    winnerMsg.textContent = "You Win🥳";
-    winnerMsg.classList.remove("hidden");
-    nextGameMsg.textContent = "Next hand..";
-    nextGameMsg.classList.remove("hidden");
-
-    setTimeout(() => {
-      clearCards();
-      nextHand();
-    }, 3000);
-
-    console.log("Escenario 1");
-  } else if (playerScore < dealerScore && dealerScore <= 21) {
-    //
-    winnerMsg.textContent = "You Lose🤬";
-    winnerMsg.classList.remove("hidden");
-    nextGameMsg.textContent = "Next hand..";
-    nextGameMsg.classList.remove("hidden");
-
-    setTimeout(() => {
-      clearCards();
-      nextHand();
-    }, 3000);
-
-    console.log("Escenario 2");
-  } else if (playerScore == dealerScore && dealerScore <= 21) {
-    miscMsg.textContent = "It's a TIE";
-    miscMsg.classList.remove("hidden");
-
-    setTimeout(() => {
-      clearCards();
-      nextHand();
-    }, 3000);
-    console.log("Escenario 3");
-  } else {
-    return;
-  }
-}
-
-function dealerTurn() {
-  while (dealerScore < 17) {
-    newCard();
-  }
-}
-
-function nextHand() {
-  miscMsg.classList.add("hidden");
-  nextGameMsg.classList.add("hidden");
-  winnerMsg.classList.add("hidden");
-  bustMsg.classList.add("hidden");
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = false;
-  }, 500);
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = true;
-  }, 750);
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = false;
-  }, 1000);
-
-  setTimeout(() => {
-    newCard();
-    playerTurn = true;
-  }, 1250);
-
-  playerTurn = true;
-}
-
-function clearCards() {
-  for (let c = 0; c < cardsDealt; c++) {
-    const removeNewCard = document.querySelector(`.temp${c}`);
-    removeNewCard.remove();
-  }
-  resetValues();
-}
-
-function cardValue() {
-  let a = [...deck[turnNumber]];
-  let card;
-
-  if (a.length > 2) {
-    return 10;
-  } else if (a.includes("A")) {
-    if (playerTurn && playerScore + 11 > 21) {
-      return 1;
-    } else if (playerTurn && playerScore + 11 <= 21) {
-      return 11;
-    } else if (!playerTurn && dealerScore + 11 > 21) {
-      return 1;
-    } else if (!playerTurn && dealerScore + 11 <= 21) {
-      return 11;
-    }
-  } else {
-    let card = Number(a[1]);
-    return card;
-  }
-}
-
-function resetValues() {
-  playerScore = 0;
-  dealerScore = 0;
-
-  playerTurn = true;
-  cardsDealt = 0;
-}
-
-function newGame() {
-  clearCards();
-  playerTurn = true;
+function onNewGame() {
   startGame();
 }
 
-buttonHit.addEventListener("click", newCard);
-buttonStand.addEventListener("click", standGame);
-buttonNewGame.addEventListener("click", newGame);
-buttonStartGame.addEventListener("click", startGame);
+function onDeckSelected(event) {
+  const selected = Number(event.target.textContent.trim());
+  if (![2, 4, 6, 8].includes(selected)) {
+    return;
+  }
 
-createDeck();
+  state.selectedDecks = selected;
+  state.hasSelectedDeck = true;
+  state.deck = [];
+  state.cardsGone = 0;
+  state.runningCount = 0;
+  ui.deckSelectors.forEach((node) => {
+    node.classList.toggle("selected", Number(node.textContent.trim()) === selected);
+  });
+  updateCounters();
+}
 
-// bug del falso blackjack (21 con mas de 2 cartas)
-// bug del A con valor 11
-// bug de los botones clickeados consecutivamente
+function closeModal() {
+  if (!state.hasSelectedDeck || state.selectedDecks === null) {
+    window.alert("Select number of decks before starting.");
+    return;
+  }
+  ui.modal.classList.add("hidden");
+}
+
+function init() {
+  ui.closeModal.addEventListener("click", closeModal);
+
+  ui.deckSelectors.forEach((selector) => {
+    selector.addEventListener("click", onDeckSelected);
+  });
+
+  ui.buttonHit.addEventListener("click", onHit);
+  ui.buttonStand.addEventListener("click", onStand);
+  ui.buttonNewGame.addEventListener("click", onNewGame);
+  ui.buttonStartGame.addEventListener("click", startGame);
+
+  resetMessages();
+  updateCounters();
+}
+
+init();

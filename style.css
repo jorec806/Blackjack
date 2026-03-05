@@ -227,6 +227,10 @@ body {
   z-index: 2;
 }
 
+.modal.hidden {
+  display: none;
+}
+
 .modal-window {
   background-color: white;
   padding: 20px;
@@ -286,5 +290,10 @@ body {
 }
 
 .deck-selector:hover {
+  transform: scale(1.1);
+}
+
+.deck-selector.selected {
+  outline: 2px solid #ffffff;
   transform: scale(1.1);
 }
