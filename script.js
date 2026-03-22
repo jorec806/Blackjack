@@ -1,5 +1,8 @@
 "use strict";
 
+const DEALER_STAND_AT = 17;
+const MIN_SHOE_CARDS = 15;
+
 const logic = window.BlackjackLogic;
 
 const ui = {
@@ -157,7 +160,7 @@ function startGame() {
     return;
   }
 
-  const needsNewShoe = state.deck.length < 15;
+  const needsNewShoe = state.deck.length < MIN_SHOE_CARDS;
   if (needsNewShoe) {
     state.deck = logic.createDeck(state.selectedDecks);
     logic.shuffleDeck(state.deck);
@@ -191,7 +194,12 @@ function onHit() {
     return;
   }
 
-  drawCardTo(state.playerHand);
+  const drawn = drawCardTo(state.playerHand);
+  if (drawn === null) {
+    endRound("Round finished", "Push", "", "Deck ran out — reshuffling next game");
+    return;
+  }
+
   renderHands();
   updateCounters();
 
@@ -209,8 +217,10 @@ function onStand() {
   state.playerTurn = false;
   renderHands();
 
-  while (logic.getHandValue(state.dealerHand) < 17) {
-    drawCardTo(state.dealerHand);
+  while (logic.getHandValue(state.dealerHand) < DEALER_STAND_AT) {
+    if (drawCardTo(state.dealerHand) === null) {
+      break;
+    }
   }
 
   renderHands();
@@ -230,10 +240,6 @@ function onStand() {
   } else {
     endRound("Round finished", "Push", "", "It's a TIE");
   }
-}
-
-function onNewGame() {
-  startGame();
 }
 
 function onDeckSelected(event) {
@@ -270,7 +276,7 @@ function init() {
 
   ui.buttonHit.addEventListener("click", onHit);
   ui.buttonStand.addEventListener("click", onStand);
-  ui.buttonNewGame.addEventListener("click", onNewGame);
+  ui.buttonNewGame.addEventListener("click", startGame);
   ui.buttonStartGame.addEventListener("click", startGame);
 
   resetMessages();

@@ -10,6 +10,13 @@
   const SUITS = ["H", "C", "S", "D"];
   const RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 
+  const BLACKJACK_VALUE = 21;
+  const CARDS_PER_DECK = 52;
+  const MIN_DECK_FRACTION = 0.25;
+  const FACE_CARDS = ["K", "Q", "J"];
+  const HIGH_CARDS = ["10", "J", "Q", "K", "A"];
+  const LOW_CARDS = ["2", "3", "4", "5", "6"];
+
   function createDeck(numberOfDecks) {
     const totalDecks = Number(numberOfDecks) || 1;
     const cards = [];
@@ -47,7 +54,7 @@
       return 11;
     }
 
-    if (["K", "Q", "J"].includes(rank)) {
+    if (FACE_CARDS.includes(rank)) {
       return 10;
     }
 
@@ -66,7 +73,7 @@
       total += getCardNumericValue(hand[i]);
     }
 
-    while (total > 21 && aces > 0) {
+    while (total > BLACKJACK_VALUE && aces > 0) {
       total -= 10;
       aces -= 1;
     }
@@ -75,17 +82,17 @@
   }
 
   function isBlackjack(hand) {
-    return hand.length === 2 && getHandValue(hand) === 21;
+    return hand.length === 2 && getHandValue(hand) === BLACKJACK_VALUE;
   }
 
   function runningCountDelta(cardCode) {
     const rank = getCardRank(cardCode);
 
-    if (["2", "3", "4", "5", "6"].includes(rank)) {
+    if (LOW_CARDS.includes(rank)) {
       return 1;
     }
 
-    if (["10", "J", "Q", "K", "A"].includes(rank)) {
+    if (HIGH_CARDS.includes(rank)) {
       return -1;
     }
 
@@ -96,11 +103,11 @@
     const player = getHandValue(playerHand);
     const dealer = getHandValue(dealerHand);
 
-    if (player > 21) {
+    if (player > BLACKJACK_VALUE) {
       return "dealer";
     }
 
-    if (dealer > 21) {
+    if (dealer > BLACKJACK_VALUE) {
       return "player";
     }
 
@@ -117,7 +124,7 @@
 
   function getTrueCount(runningCount, cardsRemaining) {
     const safeCards = Math.max(Number(cardsRemaining) || 0, 1);
-    const decksRemaining = Math.max(safeCards / 52, 0.25);
+    const decksRemaining = Math.max(safeCards / CARDS_PER_DECK, MIN_DECK_FRACTION);
     return runningCount / decksRemaining;
   }
 
